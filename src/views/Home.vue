@@ -1,4 +1,7 @@
 <script setup>
+import { useAuth } from '../composables/useAuth'
+
+const { user } = useAuth()
 </script>
 
 <template>
@@ -12,8 +15,13 @@
         mantener un registro completo de todos los juegos que amas.
       </p>
       <div class="cta">
-        <router-link to="/register" class="btn-primary btn-large">Comenzar ahora</router-link>
-        <router-link to="/login" class="btn-secondary btn-large">Ya tengo cuenta</router-link>
+        <template v-if="user">
+          <router-link to="/games" class="btn-primary btn-large">Ir a mis juegos</router-link>
+        </template>
+        <template v-else>
+          <router-link to="/register" class="btn-primary btn-large">Comenzar ahora</router-link>
+          <router-link to="/login" class="btn-secondary btn-large">Ya tengo cuenta</router-link>
+        </template>
       </div>
     </section>
 

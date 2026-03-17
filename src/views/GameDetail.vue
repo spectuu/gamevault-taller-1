@@ -67,6 +67,12 @@ function cancelEdit() {
 async function saveEdit() {
   if (!form.value.name.trim() || !form.value.image.trim()) return
   formLoading.value = true
+
+  const safetyTimeout = setTimeout(() => {
+    formLoading.value = false
+    addToast('La operación tardó demasiado. Intenta de nuevo.', 'error')
+  }, 15000)
+
   try {
     const updateData = {
       ...form.value,
@@ -86,18 +92,23 @@ async function saveEdit() {
   } catch (e) {
     addToast('Error de conexión. Intenta de nuevo.', 'error')
   } finally {
+    clearTimeout(safetyTimeout)
     formLoading.value = false
   }
 }
 
 async function deleteGame() {
-  if (!confirm(`Eliminar "${game.value.name}"?`)) return
-  const { error } = await supabase.from('games').delete().eq('id', game.value.id)
-  if (error) {
-    addToast('Error al eliminar: ' + error.message, 'error')
-  } else {
-    addToast(`"${game.value.name}" eliminado`, 'error')
-    router.push('/games')
+  if (!confirm(`¿Eliminar "${game.value.name}"?`)) return
+  try {
+    const { error } = await supabase.from('games').delete().eq('id', game.value.id)
+    if (error) {
+      addToast('Error al eliminar: ' + error.message, 'error')
+    } else {
+      addToast(`"${game.value.name}" eliminado`, 'info')
+      router.push('/games')
+    }
+  } catch (e) {
+    addToast('Error de conexión al eliminar', 'error')
   }
 }
 </script>

@@ -62,13 +62,22 @@ onMounted(() => {
 
 async function fetchGames() {
   loading.value = true
-  const { data, error } = await supabase
-    .from('games')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(100)
-  if (!error) games.value = data
-  loading.value = false
+  try {
+    const { data, error } = await supabase
+      .from('games')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(1000)
+    if (error) {
+      addToast('Error al cargar los juegos: ' + error.message, 'error')
+    } else {
+      games.value = data
+    }
+  } catch (e) {
+    addToast('Error de conexión al cargar los juegos', 'error')
+  } finally {
+    loading.value = false
+  }
 }
 
 function goToPage(page) {
@@ -125,7 +134,16 @@ async function handleSubmit() {
     formError.value = 'Todos los campos son obligatorios'
     return
   }
+  if (!editingGame.value && !user.value?.id) {
+    formError.value = 'Debes iniciar sesión para agregar juegos'
+    return
+  }
   formLoading.value = true
+
+  const safetyTimeout = setTimeout(() => {
+    formLoading.value = false
+    formError.value = 'La operación tardó demasiado. Intenta de nuevo.'
+  }, 15000)
 
   try {
     const gameData = {
@@ -168,21 +186,26 @@ async function handleSubmit() {
   } catch (e) {
     formError.value = 'Error de conexión. Intenta de nuevo.'
   } finally {
+    clearTimeout(safetyTimeout)
     formLoading.value = false
   }
 }
 
 async function deleteGame(game) {
-  if (!confirm(`Eliminar "${game.name}"?`)) return
-  const { error } = await supabase.from('games').delete().eq('id', game.id)
-  if (error) {
-    addToast('Error al eliminar: ' + error.message, 'error')
-  } else {
-    addToast(`"${game.name}" eliminado`, 'error')
-    await fetchGames()
-    if (paginatedGames.value.length === 0 && currentPage.value > 1) {
-      currentPage.value--
+  if (!confirm(`¿Eliminar "${game.name}"?`)) return
+  try {
+    const { error } = await supabase.from('games').delete().eq('id', game.id)
+    if (error) {
+      addToast('Error al eliminar: ' + error.message, 'error')
+    } else {
+      addToast(`"${game.name}" eliminado`, 'info')
+      await fetchGames()
+      if (paginatedGames.value.length === 0 && currentPage.value > 1) {
+        currentPage.value--
+      }
     }
+  } catch (e) {
+    addToast('Error de conexión al eliminar', 'error')
   }
 }
 </script>
