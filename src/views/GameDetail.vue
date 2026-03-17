@@ -67,21 +67,26 @@ function cancelEdit() {
 async function saveEdit() {
   if (!form.value.name.trim() || !form.value.image.trim()) return
   formLoading.value = true
-  const updateData = {
-    ...form.value,
-    release_year: form.value.release_year ? parseInt(form.value.release_year) : null
-  }
-  const { error } = await supabase
-    .from('games')
-    .update(updateData)
-    .eq('id', game.value.id)
-  formLoading.value = false
-  if (error) {
-    addToast('Error al guardar: ' + error.message, 'error')
-  } else {
-    Object.assign(game.value, updateData)
-    editing.value = false
-    addToast('Juego actualizado correctamente')
+  try {
+    const updateData = {
+      ...form.value,
+      release_year: form.value.release_year ? parseInt(form.value.release_year) : null
+    }
+    const { error } = await supabase
+      .from('games')
+      .update(updateData)
+      .eq('id', game.value.id)
+    if (error) {
+      addToast('Error al guardar: ' + error.message, 'error')
+    } else {
+      Object.assign(game.value, updateData)
+      editing.value = false
+      addToast('Juego actualizado correctamente')
+    }
+  } catch (e) {
+    addToast('Error de conexión. Intenta de nuevo.', 'error')
+  } finally {
+    formLoading.value = false
   }
 }
 

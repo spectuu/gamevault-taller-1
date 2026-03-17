@@ -127,44 +127,49 @@ async function handleSubmit() {
   }
   formLoading.value = true
 
-  const gameData = {
-    name: formName.value,
-    image: formImage.value,
-    description: formDescription.value,
-    genre: formGenre.value,
-    platform: formPlatform.value,
-    release_year: formReleaseYear.value ? parseInt(formReleaseYear.value) : null,
-    developer: formDeveloper.value,
-    publisher: formPublisher.value,
-    rating: formRating.value
-  }
+  try {
+    const gameData = {
+      name: formName.value,
+      image: formImage.value,
+      description: formDescription.value,
+      genre: formGenre.value,
+      platform: formPlatform.value,
+      release_year: formReleaseYear.value ? parseInt(formReleaseYear.value) : null,
+      developer: formDeveloper.value,
+      publisher: formPublisher.value,
+      rating: formRating.value
+    }
 
-  if (editingGame.value) {
-    const { error } = await supabase
-      .from('games')
-      .update(gameData)
-      .eq('id', editingGame.value.id)
-    if (error) {
-      formError.value = error.message
+    if (editingGame.value) {
+      const { error } = await supabase
+        .from('games')
+        .update(gameData)
+        .eq('id', editingGame.value.id)
+      if (error) {
+        formError.value = error.message
+      } else {
+        addToast(`"${formName.value}" actualizado correctamente`)
+        closeForm()
+        await fetchGames()
+      }
     } else {
-      addToast(`"${formName.value}" actualizado correctamente`)
-      closeForm()
-      await fetchGames()
+      gameData.user_id = user.value.id
+      const { error } = await supabase
+        .from('games')
+        .insert(gameData)
+      if (error) {
+        formError.value = error.message
+      } else {
+        addToast(`"${formName.value}" agregado correctamente`)
+        closeForm()
+        await fetchGames()
+      }
     }
-  } else {
-    gameData.user_id = user.value.id
-    const { error } = await supabase
-      .from('games')
-      .insert(gameData)
-    if (error) {
-      formError.value = error.message
-    } else {
-      addToast(`"${formName.value}" agregado correctamente`)
-      closeForm()
-      await fetchGames()
-    }
+  } catch (e) {
+    formError.value = 'Error de conexión. Intenta de nuevo.'
+  } finally {
+    formLoading.value = false
   }
-  formLoading.value = false
 }
 
 async function deleteGame(game) {
