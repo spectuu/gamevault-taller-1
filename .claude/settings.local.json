@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(cd:*)",
+      "Read(//c/Users/SoySp/onedrive/desktop/universidad/plataformas empresarial/**)",
+      "Bash(npx --yes create-vite@latest temp-vue-app --template vue)",
+      "Bash(cp:*)",
+      "Bash(rm:*)",
+      "WebFetch(domain:cdn.cloudflare.steamstatic.com)",
+      "WebFetch(domain:store.steampowered.com)",
+      "WebFetch(domain:api.rawg.io)",
+      "WebFetch(domain:assets.nintendo.com)",
+      "WebFetch(domain:image.api.playstation.com)",
+      "WebSearch",
+      "WebFetch(domain:www.nintendo.com)",
+      "WebFetch(domain:store.playstation.com)",
+      "WebFetch(domain:www.playstation.com)",
+      "Bash(curl:*)"
+    ]
+  }
+}
